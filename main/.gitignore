@@ -1,0 +1,17 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+# Dependency directories
+node_modules/
+venv/
+__pycache__/
+
+# Environment variables (This is the most crucial part)
+.env
+.env.local
+.env.development
+*.pem
+
+# Local database files
+db.sqlite3
+
+# Build output
+dist/
