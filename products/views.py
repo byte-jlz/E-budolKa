@@ -3,6 +3,16 @@ from .forms import ProductForm
 from .models import Product
 from django.contrib import messages
 from .models import Product, Address
+from rest_framework import generics
+from .serializers import ProductSerializer
+
+class ProductListAPI(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+class ProductDetailAPI(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
 def product_list(request):
     products = Product.objects.all()  # Fetches all products from the database
