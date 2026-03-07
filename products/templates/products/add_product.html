@@ -1,0 +1,24 @@
+{% extends 'products/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Add a New Product</h4>
+            </div>
+            <div class="card-body" enctype="multipart/form-data">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        {{ form.as_p }}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success w-100">List Product for Sale</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
