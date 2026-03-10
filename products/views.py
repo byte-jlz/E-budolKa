@@ -7,6 +7,10 @@ from rest_framework import generics
 from .serializers import ProductSerializer
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
+from django.contrib.auth.decorators import user_passes_test
+
+def is_seller(user):
+    return user.is_staff
 
 def register(request):
     if request.method == 'POST':
@@ -32,6 +36,7 @@ def product_list(request):
     products = Product.objects.all()  # Fetches all products from the database
     return render(request, 'products/product_list.html', {'products': products})
 
+@user_passes_test(is_seller, login_url='/seller/login/')
 def add_product(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
@@ -43,13 +48,13 @@ def add_product(request):
 
     return render(request, 'products/add_product.html', {'form': form})
 
+@user_passes_test(is_seller, login_url='/seller/login/')
 def seller_dashboard(request):
-    # This fetches all products, ordered by the newest first
     products = Product.objects.all().order_by('-created_at')
     return render(request, 'products/seller_dashboard.html', {'products': products})
 
 
-# 1. THE EDIT VIEW
+@user_passes_test(is_seller, login_url='/seller/login/')
 def edit_product(request, id):
     product = get_object_or_404(Product, id=id) # Find the exact product
     
@@ -65,7 +70,7 @@ def edit_product(request, id):
 
     return render(request, 'products/edit_product.html', {'form': form, 'product': product})
 
-# 2. THE REMOVE VIEW
+@user_passes_test(is_seller, login_url='/seller/login/')
 def remove_product(request, id):
     product = get_object_or_404(Product, id=id)
     
