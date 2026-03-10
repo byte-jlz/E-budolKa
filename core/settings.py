@@ -124,4 +124,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Authentication Redirects
 LOGIN_REDIRECT_URL = 'product_list'
+LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'      
