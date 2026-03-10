@@ -5,6 +5,20 @@ from django.contrib import messages
 from .models import Product, Address
 from rest_framework import generics
 from .serializers import ProductSerializer
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('product_list')
+    else:
+        form = UserCreationForm()
+        
+    return render(request, 'products/register.html', {'form': form})
 
 class ProductListAPI(generics.ListCreateAPIView):
     queryset = Product.objects.all()

@@ -23,7 +23,7 @@
         <div class="container">
             <a class="navbar-brand" href="{% url 'product_list' %}">E-scammerWEB</a>
             <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'product_list' %}">Home</a>
                     </li>
@@ -35,9 +35,27 @@
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-primary text-white ms-2" href="{% url 'seller_dashboard' %}">Seller Dashboard</a>
-                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-primary text-white ms-2" href="{% url 'seller_dashboard' %}">Seller Dashboard</a>
+                        </li>
+                        <li class="nav-item ms-3">
+                            <span class="text-light me-3">Hello, {{ user.username }}!</span>
+                        </li>
+                        <li class="nav-item">
+                            <form action="{% url 'logout' %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item ms-2">
+                            <a class="nav-link btn btn-outline-light" href="{% url 'login' %}">Log In</a>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <a class="nav-link btn btn-success text-white" href="{% url 'register' %}">Sign Up</a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
