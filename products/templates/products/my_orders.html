@@ -1,0 +1,51 @@
+{% extends 'products/base.html' %}
+
+{% block content %}
+<h2 class="mb-4">My Order History</h2>
+
+{% if orders %}
+    <div class="row">
+        {% for order in orders %}
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Order #{{ order.id }}</h5>
+                    <small>{{ order.created_at|date:"M d, Y - h:i A" }}</small>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3 pb-3 border-bottom">
+                        <div class="col-md-6">
+                            <strong>Deliver to:</strong><br>
+                            {{ order.address.name }} - {{ order.address.full_address }}
+                        </div>
+                        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                            <strong>Payment Method:</strong> {{ order.payment_method }}<br>
+                            <strong>Order Total:</strong> <span class="text-success fw-bold fs-5">₱{{ order.total_amount }}</span>
+                        </div>
+                    </div>
+                    
+                    <h6 class="text-muted">Items Purchased:</h6>
+                    <ul class="list-group list-group-flush">
+                        {% for item in order.items.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <span class="fw-bold">{{ item.product.name }}</span> x{{ item.quantity }}
+                            </div>
+                            <span>₱{{ item.price }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-secondary text-center py-5">
+        <i class="bi bi-bag-x fs-1 d-block mb-3"></i>
+        <h4>You haven't placed any orders yet!</h4>
+        <a href="{% url 'product_list' %}" class="btn btn-primary mt-3">Start Shopping</a>
+    </div>
+{% endif %}
+
+{% endblock %}

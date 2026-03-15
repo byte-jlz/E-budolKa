@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ProductForm
-from .models import Product
 from django.contrib import messages
-from .models import Product, Address
+from .models import Product, Address, Order, OrderItem # <-- Ensure Order and OrderItem are here!
 from rest_framework import generics
 from .serializers import ProductSerializer
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required
 
 def is_seller(user):
     return user.is_staff
@@ -123,62 +123,74 @@ def update_cart(request, id, action):
     request.session['cart'] = cart
     return redirect('view_cart')
 
-# 2. VIEW CART PAGE
+
+@login_required(login_url='/login/')
 def view_cart(request):
     cart = request.session.get('cart', {})
+
+    # 1. Calculate the totals
     cart_items = []
     total_price = 0
-    
-    # Loop through the session cart and fetch the actual product data from the database
     for product_id, quantity in cart.items():
-        product = get_object_or_404(Product, id=product_id)
-        total = product.price * quantity
-        total_price += total
-        
-        cart_items.append({
-            'product': product,
-            'quantity': quantity,
-            'total': total
-        })
-        
-    return render(request, 'products/cart.html', {'cart_items': cart_items, 'total_price': total_price})
+        try:
+            product = Product.objects.get(id=product_id)
+            total = product.price * quantity
+            total_price += total
+            cart_items.append({'product': product, 'quantity': quantity, 'total': total})
+        except Product.DoesNotExist:
+            continue # If a product was deleted from the database, ignore it in the cart
 
-
-def view_cart(request):
-    cart = request.session.get('cart', {})
-
-    # 1. HANDLE THE CHECKOUT SUBMISSION
+    # 2. HANDLE THE CHECKOUT SUBMISSION
     if request.method == 'POST':
-        for product_id, quantity in cart.items():
-            product = get_object_or_404(Product, id=product_id)
+        address_id = request.POST.get('address')
+        payment_method = request.POST.get('payment_method')
+        
+        # Failsafe: Ensure an address was selected
+        if not address_id:
+            messages.error(request, "Please select a delivery address.")
+            return redirect('view_cart')
+
+        address = get_object_or_404(Address, id=address_id)
+
+        # Create the Master Receipt
+        order = Order.objects.create(
+            user=request.user,
+            address=address,
+            payment_method=payment_method,
+            total_amount=total_price
+        )
+
+        # Create the specific products attached to the receipt
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item['product'],
+                price=item['product'].price,
+                quantity=item['quantity']
+            )
+            
             # Deduct the stock
-            product.stock -= quantity 
-            if product.stock < 0:
-                product.stock = 0 # Prevent negative stock
-            product.save()
+            item['product'].stock -= item['quantity']
+            if item['product'].stock < 0:
+                item['product'].stock = 0
+            item['product'].save()
 
-        # Clear the session cart
+        # Clear the cart and redirect
         request.session['cart'] = {}
+        messages.success(request, 'Order successfully placed! Thank you for your purchase.')
+        return redirect('product_list')
 
-        # Trigger the pop-out confirmation message
-        messages.success(request, 'Payment Successful! Your stock has been updated.')
-        return redirect('view_cart')
-    
-    cart_items = []
-    total_price = 0
-    for product_id, quantity in cart.items():
-        product = get_object_or_404(Product, id=product_id)
-        total = product.price * quantity
-        total_price += total
-        cart_items.append({'product': product, 'quantity': quantity, 'total': total})
-    
-    addresses = Address.objects.all()
+
+    # 3. HANDLE THE NORMAL CART PAGE LOAD
+    # THIS FIXES THE DROPDOWN LEAK: It strictly filters by the currently logged-in user!
+    addresses = Address.objects.filter(user=request.user)
 
     return render(request, 'products/cart.html', {
         'cart_items': cart_items,
         'total_price': total_price,
         'addresses': addresses
     })
+
 
 def update_cart(request, id, action):
     cart = request.session.get('cart', {})
@@ -198,4 +210,9 @@ def update_cart(request, id, action):
     request.session['cart'] = cart
     return redirect('view_cart')
 
-
+@login_required(login_url='/login/')
+def my_orders(request):
+    # Fetch orders for this specific user, ordered by newest first (-created_at)
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    
+    return render(request, 'products/my_orders.html', {'orders': orders})
