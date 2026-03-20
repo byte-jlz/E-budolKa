@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ProductForm
 from django.contrib import messages
-from .models import Product, Address, Order, OrderItem # <-- Ensure Order and OrderItem are here!
+from .models import Product, Order, OrderItem, Address
 from rest_framework import generics
 from .serializers import ProductSerializer
 from django.contrib.auth.forms import UserCreationForm
@@ -140,24 +140,24 @@ def view_cart(request):
         except Product.DoesNotExist:
             continue # If a product was deleted from the database, ignore it in the cart
 
-    # 2. HANDLE THE CHECKOUT SUBMISSION
     if request.method == 'POST':
         address_id = request.POST.get('address')
-        payment_method = request.POST.get('payment_method')
         
         # Failsafe: Ensure an address was selected
         if not address_id:
             messages.error(request, "Please select a delivery address.")
             return redirect('view_cart')
 
-        address = get_object_or_404(Address, id=address_id)
+        # Safer fetch: Ensures they can only use an address that actually belongs to them
+        address = get_object_or_404(Address, id=address_id, user=request.user)
 
-        # Create the Master Receipt
+        # Create the Master Receipt (Updated with new model fields!)
         order = Order.objects.create(
             user=request.user,
             address=address,
-            payment_method=payment_method,
-            total_amount=total_price
+            payment_status='Pending',  # <-- New field
+            status='Processing',       # <-- New field
+            total_amount=total_price   # (Make sure this variable matches your cart total variable!)
         )
 
         # Create the specific products attached to the receipt
@@ -178,17 +178,17 @@ def view_cart(request):
         # Clear the cart and redirect
         request.session['cart'] = {}
         messages.success(request, 'Order successfully placed! Thank you for your purchase.')
-        return redirect('product_list')
+        return redirect('product_list') # Or redirect to an 'order_history' page if you have one!
 
 
     # 3. HANDLE THE NORMAL CART PAGE LOAD
     # THIS FIXES THE DROPDOWN LEAK: It strictly filters by the currently logged-in user!
-    addresses = Address.objects.filter(user=request.user)
-
+    
+    user_addresses = request.user.addresses.all()
     return render(request, 'products/cart.html', {
         'cart_items': cart_items,
         'total_price': total_price,
-        'addresses': addresses
+        'addresses': user_addresses
     })
 
 

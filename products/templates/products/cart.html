@@ -96,13 +96,17 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Delivery Address</label>
-                        <select class="form-select shadow-sm" name="address" required>
+                        <select class="form-select" name="address" required>
                             <option value="" disabled selected>Select an address...</option>
-                            {% for addr in addresses %}
-                            <option value="{{ addr.id }}">{{ addr.name }} ({{ addr.full_address }})</option>
+                            
+                            {% for address in addresses %}
+                                <option value="{{ address.id }}">
+                                    {{ address.name }} ({{ address.full_address }})
+                                </option>
                             {% empty %}
-                            <option value="" disabled>No addresses available.</option>
+                                <option value="" disabled>No addresses saved. Please add one in your profile.</option>
                             {% endfor %}
+                            
                         </select>
                     </div>
 
