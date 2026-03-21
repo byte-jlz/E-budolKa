@@ -39,7 +39,7 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-# 4. Order Model (Now links directly to the Address model)
+# 4. Order Model
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
