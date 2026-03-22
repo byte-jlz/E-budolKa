@@ -29,7 +29,7 @@ class Product(models.Model):
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=255)
     description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=7, decimal_places=2)
     stock = models.IntegerField(default=0)
     image = models.ImageField(upload_to='product_images/', blank=True, null=True)
     image_url = models.URLField(max_length=500, blank=True, null=True)
@@ -46,7 +46,7 @@ class Order(models.Model):
     
     payment_status = models.CharField(max_length=50, default='Pending')
     status = models.CharField(max_length=50, default='Processing')
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=7, decimal_places=2)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -58,7 +58,7 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2) 
+    price = models.DecimalField(max_digits=7, decimal_places=2) 
     quantity = models.IntegerField()
 
     def __str__(self):
