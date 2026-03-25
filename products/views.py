@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ProductForm
 from django.contrib import messages
-from .models import Product, Order, OrderItem, Address
+from .models import Product, Order, OrderItem, Address, Cart
 from rest_framework import generics
 from .serializers import ProductSerializer
 from django.contrib.auth.forms import UserCreationForm
@@ -81,134 +81,102 @@ def remove_product(request, id):
     return render(request, 'products/remove_product.html', {'product': product})
 
 
-def add_to_cart(request, id):
-    cart = request.session.get('cart', {})
+@login_required(login_url='/login/')
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
     
-    product_id = str(id) # Session keys must be strings!
+    # 1. Immediate check: Is the product completely sold out?
+    if product.stock <= 0:
+        messages.error(request, f"Sorry, {product.name} is completely out of stock.")
+        # Send them back to where they came from
+        return redirect(request.META.get('HTTP_REFERER', 'product_list'))
 
-    product = get_object_or_404(Product, id=id)
-    current_quantity = cart.get(product_id, 0)
-
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart_data = cart.cart_data 
+    product_id_str = str(product_id) 
+    
+    # 2. Check current cart quantity vs available stock
+    current_quantity = cart_data.get(product_id_str, 0)
+    
     if current_quantity < product.stock:
-        cart[product_id] = current_quantity + 1
-        messages.success(request, f'Added {product.name} to your cart.')
+        cart_data[product_id_str] = current_quantity + 1
+        messages.success(request, f"{product.name} added to your cart!")
     else:
-        # Trigger an error message if they try to buy too many
-        messages.error(request, f'Sorry, only {product.stock} available in stock!')
-
-    request.session['cart'] = cart
-    return redirect('product_list')
-
-def update_cart(request, id, action):
-    cart = request.session.get('cart', {})
-    product_id = str(id)
+        messages.error(request, f"Maximum stock reached for {product.name}.")
+        
+    cart.cart_data = cart_data
+    cart.save()
     
-    # Fetch the product here as well
+    return redirect(request.META.get('HTTP_REFERER', 'product_list'))
+
+@login_required(login_url='/login/')
+def update_cart(request, id, action):
+    # 1. Fetch the user's cart straight from the database
+    cart = get_object_or_404(Cart, user=request.user)
+    cart_data = cart.cart_data
+    product_id_str = str(id)
+    
+    # 2. Fetch the product to check stock limits
     product = get_object_or_404(Product, id=id)
 
-    if product_id in cart:
+    # 3. Modify the JSON data based on the button clicked
+    if product_id_str in cart_data:
         if action == 'add':
-            # Check stock before allowing the Plus button to work!
-            if cart[product_id] < product.stock:
-                cart[product_id] += 1
+            if cart_data[product_id_str] < product.stock:
+                cart_data[product_id_str] += 1
             else:
                 messages.error(request, f'Maximum stock reached for {product.name}.')
         elif action == 'minus':
-            cart[product_id] -= 1
-            if cart[product_id] <= 0:
-                del cart[product_id]
+            cart_data[product_id_str] -= 1
+            if cart_data[product_id_str] <= 0:
+                del cart_data[product_id_str] # Removes item if it hits 0
         elif action == 'remove_all':
-            del cart[product_id]
+            del cart_data[product_id_str]
 
-    request.session['cart'] = cart
+    # 4. Save the updated JSON back to the database!
+    cart.cart_data = cart_data
+    cart.save()
+    
     return redirect('view_cart')
-
 
 @login_required(login_url='/login/')
 def view_cart(request):
-    cart = request.session.get('cart', {})
-
-    # 1. Calculate the totals
-    cart_items = []
-    total_price = 0
-    for product_id, quantity in cart.items():
-        try:
-            product = Product.objects.get(id=product_id)
-            total = product.price * quantity
-            total_price += total
-            cart_items.append({'product': product, 'quantity': quantity, 'total': total})
-        except Product.DoesNotExist:
-            continue # If a product was deleted from the database, ignore it in the cart
-
-    if request.method == 'POST':
-        address_id = request.POST.get('address')
-        
-        # Failsafe: Ensure an address was selected
-        if not address_id:
-            messages.error(request, "Please select a delivery address.")
-            return redirect('view_cart')
-
-        # Safer fetch: Ensures they can only use an address that actually belongs to them
-        address = get_object_or_404(Address, id=address_id, user=request.user)
-
-        # Create the Master Receipt (Updated with new model fields!)
-        order = Order.objects.create(
-            user=request.user,
-            address=address,
-            payment_status='Pending',  # <-- New field
-            status='Processing',       # <-- New field
-            total_amount=total_price   # (Make sure this variable matches your cart total variable!)
-        )
-
-        # Create the specific products attached to the receipt
-        for item in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                product=item['product'],
-                price=item['product'].price,
-                quantity=item['quantity']
-            )
-            
-            # Deduct the stock
-            item['product'].stock -= item['quantity']
-            if item['product'].stock < 0:
-                item['product'].stock = 0
-            item['product'].save()
-
-        # Clear the cart and redirect
-        request.session['cart'] = {}
-        messages.success(request, 'Order successfully placed! Thank you for your purchase.')
-        return redirect('product_list') # Or redirect to an 'order_history' page if you have one!
-
-
-    # 3. HANDLE THE NORMAL CART PAGE LOAD
-    # THIS FIXES THE DROPDOWN LEAK: It strictly filters by the currently logged-in user!
+    # 1. Get the user's cart from the database
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart_data = cart.cart_data
     
-    user_addresses = request.user.addresses.all()
-    return render(request, 'products/cart.html', {
+    # 2. Prepare empty lists and totals for the frontend
+    cart_items = []
+    grand_total = 0
+    
+    # 3. Loop through the JSON data and pull the real products
+    for product_id_str, quantity in cart_data.items():
+        try:
+            # Fetch the actual product from the DB using the ID
+            product = Product.objects.get(id=int(product_id_str))
+            total_item_price = product.price * quantity
+            grand_total += total_item_price
+            
+            # Add it to our list for the HTML template
+            cart_items.append({
+                'product': product,
+                'quantity': quantity,
+                'total_price': total_item_price,
+            })
+        except Product.DoesNotExist:
+            # Just in case a product was deleted from the store while in the cart
+            pass 
+
+    # 4. Send the data to your HTML page
+    context = {
         'cart_items': cart_items,
-        'total_price': total_price,
-        'addresses': user_addresses
-    })
+        'grand_total': grand_total,
+    }
+    
+    # Make sure to change 'cart.html' to whatever your actual template file is named!
+    return render(request, 'products/cart.html', context)
 
 
-def update_cart(request, id, action):
-    cart = request.session.get('cart', {})
-    product_id = str(id)
-
-    if product_id in cart:
-        if action == 'add':
-            cart[product_id] += 1
-        elif action == 'minus':
-            cart[product_id] -= 1
-            if cart[product_id] <= 0:
-                del cart[product_id]
-        elif action == 'remove_all':
-            del cart[product_id]
-
-    # Save the updated cart back to the session
-    request.session['cart'] = cart
-    return redirect('view_cart')
 
 @login_required(login_url='/login/')
 def my_orders(request):

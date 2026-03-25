@@ -33,7 +33,7 @@
                     <li class="nav-item ms-2">
                         <a class="nav-link text-white px-3" href="{% url 'view_cart' %}">
                             <i class="bi bi-cart-fill"></i> Cart 
-                            <span class="badge bg-danger ms-1">{{ request.session.cart|length }}</span>
+                            <span class="badge bg-danger ms-1">{{ cart_item_count }}</span>
                         </a>
                     </li>
 

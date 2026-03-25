@@ -31,7 +31,7 @@
                                 </a>
                             </div>
                         </td>
-                    <td class="fw-bold text-success">₱{{ item.total }}</td>
+                    <td class="fw-bold text-success">₱{{ item.total_price }}</td>
 
                     <td class="text-end">
                         <a href="{% url 'update_cart' item.product.id 'remove_all' %}" class="btn btn-sm btn-outline-danger">
@@ -53,7 +53,7 @@
             <tfoot class="table-dark">
                 <tr>
                     <td colspan="3" class="text-end fw-bold">Grand Total:</td>
-                    <td class="fw-bold text-warning">₱{{ total_price }}</td>
+                    <td class="fw-bold text-warning">₱{{ grand_total }}</td>
                     <td></td> </tr>
             </tfoot>
             {% endif %}
