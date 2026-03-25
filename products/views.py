@@ -8,6 +8,77 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
+
+@login_required(login_url='/login/')
+def checkout(request):
+    if request.method == 'POST':
+        address_id = request.POST.get('address')
+        if not address_id:
+            messages.error(request, "Please select a delivery address.")
+            return redirect('view_cart')
+
+        cart = get_object_or_404(Cart, user=request.user)
+        cart_data = cart.cart_data
+
+        if not cart_data:
+            messages.error(request, "Your cart is empty.")
+            return redirect('view_cart')
+
+        try:
+            with transaction.atomic():
+                address = get_object_or_404(Address, id=address_id, user=request.user)
+                
+                total_amount = 0
+                for product_id_str, quantity in cart_data.items():
+                    product = Product.objects.get(id=int(product_id_str))
+                    total_amount += product.price * quantity
+
+                # FIX 1: Matched exactly to your Class Diagram!
+                order = Order.objects.create(
+                    user=request.user,
+                    address=address,
+                    total_amount=total_amount,
+                    # Since it is COD, the payment is 'Pending' until the rider delivers it!
+                    payment_status='Pending', 
+                    status='Processing'
+                )
+
+                for product_id_str, quantity in cart_data.items():
+                    product = Product.objects.get(id=int(product_id_str))
+                    
+                    if product.stock < quantity:
+                        raise ValueError(f"Sorry, {product.name} just ran out of stock!")
+                        
+                    # FIX 2: Removed total_amount from OrderItem to match your Class Diagram
+                    OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        price=product.price,
+                        quantity=quantity
+                    )
+                    
+                    product.stock -= quantity
+                    product.save()
+
+                cart.cart_data = {}
+                cart.save()
+
+                messages.success(request, "Order placed successfully!")
+                return redirect('my_orders') 
+
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect('view_cart')
+        
+        # FIX 3: UN-HIDING THE REAL ERROR
+        except Exception as e:
+            # This will now print the EXACT Python error on your screen so we can see it!
+            messages.error(request, f"System Error: {str(e)}")
+            return redirect('view_cart')
+
+    return redirect('view_cart')
+
 
 def is_seller(user):
     return user.is_staff
@@ -141,41 +212,36 @@ def update_cart(request, id, action):
 
 @login_required(login_url='/login/')
 def view_cart(request):
-    # 1. Get the user's cart from the database
     cart, created = Cart.objects.get_or_create(user=request.user)
     cart_data = cart.cart_data
     
-    # 2. Prepare empty lists and totals for the frontend
     cart_items = []
     grand_total = 0
     
-    # 3. Loop through the JSON data and pull the real products
     for product_id_str, quantity in cart_data.items():
         try:
-            # Fetch the actual product from the DB using the ID
             product = Product.objects.get(id=int(product_id_str))
             total_item_price = product.price * quantity
             grand_total += total_item_price
             
-            # Add it to our list for the HTML template
             cart_items.append({
                 'product': product,
                 'quantity': quantity,
                 'total_price': total_item_price,
             })
         except Product.DoesNotExist:
-            # Just in case a product was deleted from the store while in the cart
             pass 
 
-    # 4. Send the data to your HTML page
+    user_address = Address.objects.filter(user=request.user)
+
+    # Add the addresses to the context dictionary so the HTML can see them
     context = {
         'cart_items': cart_items,
         'grand_total': grand_total,
+        'addresses': user_address, 
     }
     
-    # Make sure to change 'cart.html' to whatever your actual template file is named!
     return render(request, 'products/cart.html', context)
-
 
 
 @login_required(login_url='/login/')

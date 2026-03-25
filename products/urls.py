@@ -22,4 +22,7 @@ urlpatterns = [
     path('seller/remove/<int:id>/', views.remove_product, name='remove_product'),
 
     path('my-orders/', views.my_orders, name='my_orders'),
+
+    path('checkout/', views.checkout, name='checkout')
 ]
+
