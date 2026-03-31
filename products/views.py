@@ -209,7 +209,7 @@ def add_product(request):
             return redirect('seller_dashboard')
     else:
         form = ProductForm()
-    return render(request, 'products/add_product.html', {'form': form})
+    return render(request, 'products/admin/product_add.html', {'form': form})
 
 def edit_product(request, id):
     product = get_object_or_404(Product, id=id)
