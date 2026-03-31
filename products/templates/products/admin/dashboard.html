@@ -53,7 +53,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-sm text-gray-600">Total Revenue</p>
-                <p class="text-2xl font-semibold">${{ total_revenue|floatformat:2 }}</p>
+                <p class="text-2xl font-semibold">₱{{ total_revenue|floatformat:2 }}</p>
             </div>
         </div>
     </div>
@@ -72,7 +72,7 @@
                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
                         <div>
                             <p class="font-medium">Order #{{ order.id }}</p>
-                            <p class="text-sm text-gray-600">{{ order.user.username }} - ${{ order.total_amount }}</p>
+                            <p class="text-sm text-gray-600">{{ order.user.username }} - ₱{{ order.total_amount }}</p>
                             <p class="text-xs text-gray-500">{{ order.created_at|date:"M d, Y H:i" }}</p>
                         </div>
                         <div>
@@ -120,7 +120,7 @@
                             {% endif %}
                             <div>
                                 <p class="font-medium">{{ product.name }}</p>
-                                <p class="text-sm text-gray-600">{{ product.get_category_display }} - ${{ product.price }}</p>
+                                <p class="text-sm text-gray-600">{{ product.get_category_display }} - ₱{{ product.price }}</p>
                                 <p class="text-xs text-gray-500">{{ product.created_at|date:"M d, Y" }}</p>
                             </div>
                         </div>
