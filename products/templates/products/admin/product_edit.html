@@ -1,0 +1,101 @@
+{% extends 'products/admin/base_admin.html' %}
+
+{% block title %}Edit Product{% endblock %}
+
+{% block header %}Edit Product{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b">
+            <h3 class="text-lg font-semibold">Edit Product</h3>
+        </div>
+        <form method="POST" enctype="multipart/form-data" class="p-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                    {{ form.name }}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Slug</label>
+                    {{ form.slug }}
+                    <p class="text-xs text-gray-500 mt-1">URL-friendly version of the name</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    {{ form.category }}
+                    <p class="text-xs text-gray-500 mt-1">Select a category for this product</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                    {{ form.price }}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Stock</label>
+                    {{ form.stock }}
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    {{ form.description }}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+                    {{ form.image }}
+                    {% if product.image %}
+                        <p class="text-xs text-gray-500 mt-1">Current: {{ product.image.name }}</p>
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="mt-2 h-20 w-20 object-cover rounded">
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
+                    {{ form.image_url }}
+                    <p class="text-xs text-gray-500 mt-1">External image URL (optional)</p>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end space-x-4">
+                <a href="{% url 'admin_products' %}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </a>
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                    Update Product
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+input[type="text"], input[type="number"], input[type="url"], input[type="file"], textarea, select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+select {
+    cursor: pointer;
+}
+</style>
+{% endblock %}

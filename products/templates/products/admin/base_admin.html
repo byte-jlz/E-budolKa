@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %} - E-BudolKa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar-link:hover {
+            background-color: #4F46E5;
+            color: white;
+        }
+        .sidebar-link.active {
+            background-color: #4F46E5;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-800 text-white">
+            <div class="p-4">
+                <h2 class="text-2xl font-bold">E-BudolKa Admin</h2>
+                <p class="text-gray-400 text-sm">Management Panel</p>
+            </div>
+            
+            <nav class="mt-8">
+                <a href="{% url 'admin_dashboard' %}" class="sidebar-link block px-4 py-3 hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-tachometer-alt mr-3"></i> Dashboard
+                </a>
+                <a href="{% url 'admin_products' %}" class="sidebar-link block px-4 py-3 hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-box mr-3"></i> Products
+                </a>
+                <a href="{% url 'admin_categories' %}" class="sidebar-link block px-4 py-3 hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-tags mr-3"></i> Categories
+                </a>
+                <a href="{% url 'admin_orders' %}" class="sidebar-link block px-4 py-3 hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-shopping-cart mr-3"></i> Orders
+                </a>
+                <a href="{% url 'admin_users' %}" class="sidebar-link block px-4 py-3 hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-users mr-3"></i> Users
+                </a>
+                <hr class="my-4 border-gray-700">
+                <a href="{% url 'logout' %}" class="sidebar-link block px-4 py-3 hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-sign-out-alt mr-3"></i> Logout
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm border-b">
+                <div class="px-6 py-4 flex justify-between items-center">
+                    <h1 class="text-2xl font-semibold text-gray-800">{% block header %}Admin Dashboard{% endblock %}</h1>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-600">Welcome, {{ user.username }}</span>
+                        <div class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-x-auto overflow-y-auto bg-gray-50 p-6">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% block content %}
+                {% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Set active sidebar link based on current URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            
+            sidebarLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

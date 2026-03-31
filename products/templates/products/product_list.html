@@ -1,32 +1,64 @@
 {% extends 'products/base.html' %}
 
 {% block content %}
-<h2 class="mb-4">Available Products</h2>
+<div class="container mt-4">
+    <h2 class="mb-4">Available Products</h2>
 
-<div class="row">
-    {% for product in products %}
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                {% if product.image_url %}
-                    <img src="{{ product.image_url }}" class="img-fluid mb-3 rounded" alt="{{ product.name }}" style="max-height: 200px; object-fit: cover; width: 100%;">
-                {% elif product.image %}
-                    <img src="{{ product.image.url }}" class="img-fluid mb-3 rounded" alt="{{ product.name }}" style="max-height: 200px; object-fit: cover; width: 100%;">
-                {% endif %}
-                <h5 class="card-title">{{ product.name }}</h5>
-                <p class="card-text text-muted">{{ product.description }}</p>
-                <h4 class="text-success">₱{{ product.price }}</h4>
-                <p class="small text-secondary">In Stock: {{ product.stock }}</p>
-            </div>
-            <div class="card-footer bg-white border-top-0">
-                <a href="{% url 'add_to_cart' product.id %}" class="btn btn-outline-primary w-100">Add to Cart</a>
-            </div>
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form method="GET" class="d-flex">
+                <input type="text" name="search" value="{{ search_query }}" class="form-control me-2" placeholder="Search products...">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
         </div>
     </div>
-    {% empty %}
-    <div class="col-12">
-        <p class="text-muted">No products available yet. Be the first to add one!</p>
+
+    <!-- Category Filter -->
+    <div class="mb-4">
+        <div class="btn-group" role="group">
+            <a href="{% url 'product_list' %}" class="btn {% if not selected_category %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+            {% for category in categories %}
+                <a href="?category={{ category.slug }}" class="btn {% if selected_category == category.slug %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    {{ category.name }}
+                </a>
+            {% endfor %}
+        </div>
     </div>
-    {% endfor %}
+
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if product.image_url %}
+                    <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                {% elif product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
+                        <i class="fas fa-image text-muted fa-3x"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <span class="badge bg-info mb-2">{{ product.get_category_display }}</span>
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text text-muted">{{ product.description|truncatewords:15 }}</p>
+                    <h4 class="text-primary">₱{{ product.price }}</h4>
+                    <p class="small text-muted">Stock: {{ product.stock }}</p>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary w-100">Add to Cart</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h4 class="alert-heading">No products available</h4>
+                <p>Check back later for new products!</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

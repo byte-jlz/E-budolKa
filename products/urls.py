@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
     path('', views.product_list, name='product_list'), 
-    path('cart/add/<int:id>/', views.add_to_cart, name='add_to_cart'),
+    path('cart/add/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
     path('cart/', views.view_cart, name='view_cart'),
     path('cart/update/<int:id>/<str:action>/', views.update_cart, name='update_cart'),
     
@@ -22,4 +22,21 @@ urlpatterns = [
     path('seller/remove/<int:id>/', views.remove_product, name='remove_product'),
 
     path('my-orders/', views.my_orders, name='my_orders'),
+    path('checkout/', views.checkout, name='checkout'),
+
+    # Admin URLs
+    path('admin/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin/products/', views.admin_products, name='admin_products'),
+    path('admin/products/add/', views.admin_product_add, name='admin_product_add'),
+    path('admin/products/edit/<int:product_id>/', views.admin_product_edit, name='admin_product_edit'),
+    path('admin/products/delete/<int:product_id>/', views.admin_product_delete, name='admin_product_delete'),
+    path('admin/orders/', views.admin_orders, name='admin_orders'),
+    path('admin/orders/<int:order_id>/', views.admin_order_detail, name='admin_order_detail'),
+    path('admin/users/', views.admin_users, name='admin_users'),
+    path('admin/users/<int:user_id>/', views.admin_user_detail, name='admin_user_detail'),
+    path('admin/categories/', views.admin_categories, name='admin_categories'),
+    path('admin/categories/create/', views.admin_category_create, name='admin_category_create'),
+    path('admin/categories/edit/<int:category_id>/', views.admin_category_edit, name='admin_category_edit'),
+    path('admin/categories/delete/<int:category_id>/', views.admin_category_delete, name='admin_category_delete'),
 ]
+

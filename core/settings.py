@@ -65,6 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'products.context_processors.cart_count',
             ],
         },
     },
@@ -127,3 +128,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_REDIRECT_URL = 'product_list'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'      
+
+AUTH_USER_MODEL = 'products.CustomUser'

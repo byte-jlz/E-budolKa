@@ -1,0 +1,70 @@
+{% extends 'products/admin/base_admin.html' %}
+
+{% block title %}Delete Category{% endblock %}
+
+{% block header %}Delete Category{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b">
+            <h3 class="text-lg font-semibold text-red-600">Delete Category</h3>
+        </div>
+        <div class="p-6">
+            <div class="mb-4">
+                <p class="text-gray-600">Are you sure you want to delete this category?</p>
+                <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <h4 class="font-medium text-gray-900">{{ category.name }}</h4>
+                    <p class="text-sm text-gray-600 mt-1">{{ category.description|default:"No description" }}</p>
+                    <div class="mt-2 flex items-center space-x-4">
+                        <span class="text-sm font-medium">Slug: {{ category.slug }}</span>
+                        <span class="text-sm font-medium">Products: {{ category.products.count }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            {% if category.products.count > 0 %}
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">Warning</h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <p>This category contains <strong>{{ category.products.count }}</strong> product(s). Deleting this category will not delete the products, but they will no longer be associated with this category.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Warning</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p>This action cannot be undone. This will permanently delete the category from the database.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="POST" class="mt-6">
+                {% csrf_token %}
+                <div class="flex justify-end space-x-4">
+                    <a href="{% url 'admin_categories' %}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                        <i class="fas fa-trash mr-2"></i>Delete Category
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

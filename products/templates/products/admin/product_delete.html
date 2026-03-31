@@ -1,0 +1,57 @@
+{% extends 'products/admin/base_admin.html' %}
+
+{% block title %}Delete Product{% endblock %}
+
+{% block header %}Delete Product{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b">
+            <h3 class="text-lg font-semibold text-red-600">Delete Product</h3>
+        </div>
+        <div class="p-6">
+            <div class="mb-4">
+                <p class="text-gray-600">Are you sure you want to delete this product?</p>
+                <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <h4 class="font-medium text-gray-900">{{ product.name }}</h4>
+                    <p class="text-sm text-gray-600 mt-1">{{ product.description|truncatewords:20 }}</p>
+                    <div class="mt-2 flex items-center space-x-4">
+                        <span class="text-sm font-medium">Price: ${{ product.price }}</span>
+                        <span class="text-sm font-medium">Stock: {{ product.stock }}</span>
+                    </div>
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="mt-3 h-20 w-20 object-cover rounded" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik00MCA1MkMzNi40MTA3IDUyIDMzLjU4NTggNDkuMTQyOSAzMyA0NUMzMyA0MC40MTQzIDM2LjQxMDcgMzggNDAgMzhDMzQuNTg1OCAzOCAzNyA0MC40MTQzIDM3IDQ1QzM3IDQ5LjE0MjkgMzYuNDEwNyA1MiA0MCA1MloiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+'">
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">Warning</h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <p>This action cannot be undone. This will permanently delete the product from the database.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="POST" class="mt-6">
+                {% csrf_token %}
+                <div class="flex justify-end space-x-4">
+                    <a href="{% url 'admin_products' %}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                        <i class="fas fa-trash mr-2"></i>Delete Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
