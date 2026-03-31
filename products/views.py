@@ -454,10 +454,26 @@ def admin_users(request):
 def admin_user_detail(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
     user_orders = Order.objects.filter(user=user).order_by('-created_at')
+    user_addresses = Address.objects.filter(user=user)
+    
+    # Handle role update form submission
+    if request.method == 'POST' and 'role' in request.POST:
+        new_role = request.POST.get('role')
+        if new_role:
+            user.role = new_role
+            user.save()
+            messages.success(request, f'User role updated to {new_role} successfully!')
+            return redirect('admin_user_detail', user_id=user_id)
+    
+    # Get user cart if exists
+    user_cart = Cart.objects.filter(user=user).first()
     
     context = {
         'user': user,
         'user_orders': user_orders,
+        'user_addresses': user_addresses,
+        'user_cart': user_cart,
+        'role_choices': CustomUser.ROLE_CHOICES,
     }
     return render(request, 'products/admin/user_detail.html', context)
 
@@ -477,6 +493,22 @@ def admin_user_create(request):
         'form': form,
     }
     return render(request, 'products/admin/user_create.html', context)
+
+@login_required(login_url='/login/')
+@user_passes_test(is_admin, login_url='/login/')
+def admin_user_delete(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    
+    if request.method == 'POST':
+        username = user.username
+        user.delete()
+        messages.success(request, f'User {username} deleted successfully!')
+        return redirect('admin_users')
+    
+    context = {
+        'user': user,
+    }
+    return render(request, 'products/admin/user_delete.html', context)
 
 @login_required(login_url='/login/')
 @user_passes_test(is_admin, login_url='/login/')

@@ -208,6 +208,9 @@
                 <a href="{% url 'admin_orders' %}?search={{ user.username }}" class="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 transition-colors">
                     <i class="fas fa-shopping-cart mr-2"></i>View User Orders
                 </a>
+                <a href="{% url 'admin_user_delete' user.id %}" class="block w-full px-4 py-2 bg-red-600 text-white text-center rounded-lg hover:bg-red-700 transition-colors">
+                    <i class="fas fa-trash-alt mr-2"></i>Delete User
+                </a>
                 <a href="{% url 'admin_users' %}" class="block w-full px-4 py-2 bg-gray-600 text-white text-center rounded-lg hover:bg-gray-700 transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>Back to Users
                 </a>

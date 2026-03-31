@@ -35,6 +35,7 @@ urlpatterns = [
     path('admin/users/', views.admin_users, name='admin_users'),
     path('admin/users/create/', views.admin_user_create, name='admin_user_create'),
     path('admin/users/<int:user_id>/', views.admin_user_detail, name='admin_user_detail'),
+    path('admin/users/<int:user_id>/delete/', views.admin_user_delete, name='admin_user_delete'),
     path('admin/categories/', views.admin_categories, name='admin_categories'),
     path('admin/categories/create/', views.admin_category_create, name='admin_category_create'),
     path('admin/categories/edit/<int:category_id>/', views.admin_category_edit, name='admin_category_edit'),
