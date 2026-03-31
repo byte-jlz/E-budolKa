@@ -12,6 +12,20 @@ from .models import Product, Order, OrderItem, Address, Cart, CustomUser, Catego
 from .forms import ProductForm, CustomUserCreationForm
 from .serializers import ProductSerializer
 
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+
+def custom_logout(request):
+    print(f"Logout request method: {request.method}")
+    if request.method == 'POST':
+        print("Processing POST logout")
+        logout(request)
+        print("Logout completed, redirecting to login")
+        return redirect('login')
+    else:
+        print("Not a POST request, redirecting to login")
+        return redirect('login')
+
 def is_admin(user):
     return user.is_authenticated and user.role == 'Admin'
 

@@ -26,8 +26,8 @@ from products import views as product_views
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('login/', auth_views.LoginView.as_view(template_name='products/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    path('login/', auth_views.LoginView.as_view(template_name='products/login.html', redirect_authenticated_user=True), name='login'),
+    path('logout/', product_views.custom_logout, name='logout'),
     path('register/', product_views.register, name='register'),
     
     path('products/', include('products.urls')), # This links your new app routes
