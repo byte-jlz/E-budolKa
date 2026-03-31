@@ -9,7 +9,7 @@ from django.contrib.auth import login
 from django.core.paginator import Paginator
 from rest_framework import generics
 from .models import Product, Order, OrderItem, Address, Cart, CustomUser, Category
-from .forms import ProductForm
+from .forms import ProductForm, CustomUserCreationForm
 from .serializers import ProductSerializer
 
 def is_admin(user):
@@ -440,6 +440,23 @@ def admin_user_detail(request, user_id):
         'user_orders': user_orders,
     }
     return render(request, 'products/admin/user_detail.html', context)
+
+@login_required(login_url='/login/')
+@user_passes_test(is_admin, login_url='/login/')
+def admin_user_create(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, f'User {user.username} created successfully!')
+            return redirect('admin_users')
+    else:
+        form = CustomUserCreationForm()
+    
+    context = {
+        'form': form,
+    }
+    return render(request, 'products/admin/user_create.html', context)
 
 @login_required(login_url='/login/')
 @user_passes_test(is_admin, login_url='/login/')

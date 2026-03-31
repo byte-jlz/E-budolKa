@@ -8,6 +8,12 @@
 <!-- Search and Filter Bar -->
 <div class="bg-white rounded-lg shadow mb-6">
     <div class="p-4">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">User Management</h2>
+            <a href="{% url 'admin_user_create' %}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                <i class="fas fa-user-plus mr-2"></i>Create User
+            </a>
+        </div>
         <form method="GET" class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1">
