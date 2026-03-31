@@ -393,9 +393,29 @@ def admin_order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     order_items = OrderItem.objects.filter(order=order)
     
+    # Handle status update form submission
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        new_payment_status = request.POST.get('payment_status')
+        
+        if new_status:
+            order.status = new_status
+        if new_payment_status:
+            order.payment_status = new_payment_status
+            
+        order.save()
+        messages.success(request, 'Order status updated successfully!')
+        return redirect('admin_order_detail', order_id=order_id)
+    
+    # Define status choices
+    STATUS_CHOICES = ['Processing', 'Shipped', 'Delivered', 'Cancelled']
+    PAYMENT_CHOICES = ['Pending', 'Paid', 'Failed', 'Refunded']
+    
     context = {
         'order': order,
         'order_items': order_items,
+        'status_choices': STATUS_CHOICES,
+        'payment_choices': PAYMENT_CHOICES,
     }
     return render(request, 'products/admin/order_detail.html', context)
 

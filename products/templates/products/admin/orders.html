@@ -59,7 +59,7 @@
                         <div class="text-sm text-gray-500">{{ order.user.email }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-gray-900">${{ order.total_amount }}</div>
+                        <div class="text-sm font-medium text-gray-900">₱{{ order.total_amount }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         {% if order.payment_status == 'Paid' %}
@@ -137,7 +137,7 @@
             </div>
             <div class="ml-3">
                 <p class="text-sm text-gray-600">Total Revenue</p>
-                <p class="text-lg font-semibold">${{ total_revenue|floatformat:2 }}</p>
+                <p class="text-lg font-semibold">₱{{ total_revenue|floatformat:2 }}</p>
             </div>
         </div>
     </div>

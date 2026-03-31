@@ -118,7 +118,7 @@
                         {% for order in user_orders %}
                         <tr>
                             <td class="px-6 py-4 text-sm font-medium text-gray-900">#{{ order.id }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">${{ order.total_amount }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">₱{{ order.total_amount }}</td>
                             <td class="px-6 py-4">
                                 {% if order.status == 'Delivered' %}
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">

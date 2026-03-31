@@ -17,7 +17,7 @@
                     <h4 class="font-medium text-gray-900">{{ product.name }}</h4>
                     <p class="text-sm text-gray-600 mt-1">{{ product.description|truncatewords:20 }}</p>
                     <div class="mt-2 flex items-center space-x-4">
-                        <span class="text-sm font-medium">Price: ${{ product.price }}</span>
+                        <span class="text-sm font-medium">Price: ₱{{ product.price }}</span>
                         <span class="text-sm font-medium">Stock: {{ product.stock }}</span>
                     </div>
                     {% if product.image %}
