@@ -168,8 +168,12 @@ def checkout(request):
                 address = get_object_or_404(Address, id=address_id, user=request.user)
                 
                 total_amount = 0
+                # Check stock availability and calculate total
                 for product_id_str, quantity in cart_data.items():
                     product = Product.objects.get(id=int(product_id_str))
+                    if product.stock < quantity:
+                        messages.error(request, f"Insufficient stock for {product.name}. Available: {product.stock}, Requested: {quantity}")
+                        return redirect('view_cart')
                     total_amount += product.price * quantity
 
                 order = Order.objects.create(
@@ -188,6 +192,9 @@ def checkout(request):
                         price=product.price,
                         quantity=quantity
                     )
+                    # Deduct stock after creating order item
+                    product.stock -= quantity
+                    product.save()
                 
                 # Clear cart after successful order
                 cart.cart_data = {}
